@@ -29,8 +29,15 @@ class AdapterTest < ActiveSupport::TestCase
   end
 
   def test_perform_job_logging
-    HelloJob.enqueue "Cristian"
-    assert_match(/Performed HelloJob from .*?:.*Cristian/, @logger.logged(:info).join)
+    HelloJob.new.execute "Cristian"
+    assert_match(/Performing HelloJob from .*?:.*Cristian/, @logger.logged(:info).join)
+    assert_match(/Performed HelloJob from .*?sec:.*Cristian/, @logger.logged(:info).join)
+  end
+
+  def test_perform_job_error_logging
+    RescueJob.new.execute "david"
+    assert_match(/Performing RescueJob from .*?:.*david/, @logger.logged(:info).join)
+    assert_match(/Failed to perform RescueJob from .*?sec:.*david/, @logger.logged(:info).join)
   end
 
   def test_enqueue_at_job_logging
